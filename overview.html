@@ -1,0 +1,49 @@
+<body>
+  <h1>j(s) Transaction Implementation Based on Hibernate</h1>
+  
+  <p>Hibernate adapter for transaction integration with managed class containers. Hibernate adapter is deployed as service for {@link js.container.TransactionManager} interface. Beside implementing transaction manager and transaction instance Hibernate adapter supplies {@link js.hibernate.SessionManager} that simplify Hibernate working unit coding.</p>
+  <p>Also there is simplified support for Hibernate user defined types. Base class {@link js.hibernate.hbm.ObjectHbm} can be simply sub-classed to get a new user defined type, see sample code.</p>
+  <pre>public class MessageHbm extends ObjectHbm&lt;Message&gt; {
+  public MessageHbm() {
+    super(Message.class);
+  }
+}</pre>
+  <h5>Configuration</h5>
+  <p>Basically Hibernate adapter creates a session factory then uses it to create transaction instances. Session factory needs to be configured some way with database name, user name, password and so on.</p>
+  <p>Configuration is read from a configuration source that is a XML stream. {@link js.hibernate.TransactionManagerImpl#config(java.io.Reader)} creates configuration object, {@link js.hibernate.Config} and pass it to {@link js.hibernate.HibernateAdapter#config(Config)} that use it to create session factory. Here is a production ready sample based on MySQL and C3P0 connections pool. It can be changed to whatever database engine and connection provider, of course if supported by Hibernate version.</p>
+  <pre>&lt;transactional-resource type="DATABASE" provider="HIBERNATE"&gt;
+  &lt;property name="hibernate.connection.driver_class" value="com.mysql.jdbc.Driver" /&gt;
+  &lt;property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/${database-name}?autoReconnect=true&amp;useUnicode=true&amp;characterEncoding=UTF-8" /&gt;
+  &lt;property name="hibernate.connection.username" value="${user-name}" /&gt;
+  &lt;property name="hibernate.connection.password" value="${password}" /&gt;
+  &lt;property name="hibernate.default_schema" value="${database-name}" /&gt;
+  &lt;property name="hibernate.connection.provider_class" value="org.hibernate.connection.C3P0ConnectionProvider" /&gt;
+  &lt;property name="hibernate.c3p0.min_size" value="5" /&gt;
+  &lt;property name="hibernate.c3p0.max_size" value="140" /&gt;
+  &lt;property name="hibernate.c3p0.max_statements" value="50" /&gt;
+  &lt;property name="hibernate.c3p0.timeout" value="1800" /&gt;
+  &lt;property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" /&gt;
+  &lt;property name="hibernate.show_sql" value="false" /&gt;
+  &lt;mappings package="sixqs.site.hbm" files-pattern="*.hbm" /&gt;
+&lt;/transactional-resource&gt;</pre>
+  <p>
+    Properties are sent to Hibernate session factory builder, after a minimal sanity check. For Hibernate mappings there are
+    <code>mappings</code>
+    child elements into configuration object. There can be a not limited number of
+    <code>mappings</code>
+    elements but usually it is a single one. A mapping element has
+    <code>package</code>
+    and
+    <code>files-pattern</code>
+    attributes. Files pattern is optional with default
+    <code>*.hbm.xml</code>
+    .
+  </p>
+  <p>The root of configuration object is not processed by current adapter version and its attributes are just to give a hint about transactional resource kind.</p>
+  <h5>Session Manager</h5>
+  <p>Hibernate session manager present a shorter alternative for Hibernate session interface. It is used to save, query and delete objects and collections to/from persistence layer. Direct object and collection handling is performed by this interface; for more complex queries delegate query interfaces, see {@link js.hibernate.HqlQuery} and {@link js.hibernate.SqlQuery}.</p>
+  <p>Here is how to retrieve a list of item using Hibernate API.</p>
+  <pre>return session.createSQLQuery("SELECT * FROM relation WHERE parentKind=? AND parentId=?").setParameter(0, kind.name()).setParameter(1, id).setFirstResult(20).setMaxResults(10).list();</pre>
+  <p>The same job execute with session manager.</p>
+  <pre>return sessionManager.SQL("SELECT * FROM relation WHERE parentKind=? AND parentId=?", kind.name(), id).limit(20, 10).list();</pre>
+</body>
