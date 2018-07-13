@@ -1,5 +1,6 @@
 package js.transaction.hibernate;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,25 @@ public interface HqlQuery
    * @throws IllegalArgumentException if parameter value is null.
    */
   HqlQuery param(String name, Object value);
+
+  /**
+   * Bind collection to named query parameter and select behavior for empty value. The same rule for positioned
+   * parameters applies to this method, see {@link #param(String, Object)}.
+   * <p>
+   * The third argument is used to select this HQL query behavior when <code>value</code> argument is an empty
+   * collection. Not sure if depends on database driver or is by specification, but observed on some: there is exception
+   * when use empty collection parameter with <code>IN</code> clause. If true, argument <code>forceEmpty</code> will
+   * force {@link #list()} and {@link #list(Class)} to return empty result; otherwise provided collection should not be
+   * empty.
+   * 
+   * @param name parameter name,
+   * @param value parameter value,
+   * @param forceEmpty force {@link #list()} and {@link #list(Class)} to return empty result if <code>value</code> is
+   *          empty.
+   * @return this pointer.
+   * @throws IllegalArgumentException if parameter value is null.
+   */
+  HqlQuery param(String name, Collection<?> value, boolean forceEmpty);
 
   /**
    * Set the maximum number of rows this query may return. Internally uses
@@ -92,6 +112,35 @@ public interface HqlQuery
    * @throws HibernateException for Hibernate related fails like bad query syntax or entity not defined.
    */
   <T> List<T> list();
+
+  /**
+   * Variant of {@link #list()} that return list of entities of specified type. This variant is especially useful when
+   * want to map columns to arbitrary user defined types. Selected column alias is used to invoke setter on user defined
+   * type. Column alias should be present even if the same as column name; it is possible for database driver to force
+   * column names as upper case if if in HWL query is lower.
+   * <p>
+   * Usage pattern is like below:
+   * 
+   * <pre>
+   * class Person {
+   *    private String name;
+   *    private int age;
+   *    ...
+   *    // properties setters
+   * }
+   * 
+   * List&lt;Person&gt; persons = sm.HQL(&quot;select column1 as name, column2 as age from ... &quot;).list(Person.class);
+   * </pre>
+   * 
+   * Implementation uses Transformers.aliasToBean(type) to bind a built-in result transformer. It is caller
+   * responsibility to ensure type compatibility between selected columns and type fields. For example if database
+   * numeric value is LONG there will be exception when try to set <code>age</code> value.
+   * 
+   * @param type requested entity type.
+   * @param <T> list type.
+   * @return list of entities, possible empty.
+   */
+  <T> List<T> list(Class<T> type);
 
   /**
    * Execute database select on two properties and returns them as key/values map, first property in query being the map
