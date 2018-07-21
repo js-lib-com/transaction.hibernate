@@ -1,8 +1,31 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>js-lib</groupId>
+	<groupId>com.js-lib</groupId>
 	<artifactId>js-hibernate</artifactId>
 	<version>1.1.0</version>
+	<packaging>jar</packaging>
+
+	<name>Hibernate3 Implementation of j(s)-lib Transaction API</name>
+	<description>Hibernate3 adapter for transaction integration with managed class containers.</description>
+	<url>https://github.com/js-lib-com/transaction.hibernate</url>
+
+	<developers>
+		<developer>
+			<name>Iulian Rotaru</name>
+			<email>iulian@js-lib.com</email>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+		</license>
+	</licenses>
+
+	<scm>
+		<connection>https://github.com/js-lib-com/transaction.hibernate.git</connection>
+		<url>https://github.com/js-lib-com/transaction.hibernate</url>
+	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -55,10 +78,34 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
 	<dependencies>
+		<dependency>
+			<groupId>com.js-lib</groupId>
+			<artifactId>js-transaction-api</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>3.6.4.Final</version>
+		</dependency>
 		<dependency>
 			<groupId>javax.transaction</groupId>
 			<artifactId>jta</artifactId>
@@ -78,20 +125,10 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>js-lib</groupId>
-			<artifactId>js-transaction-api</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
 			<groupId>com.mchange</groupId>
 			<artifactId>c3p0</artifactId>
 			<version>0.9.5.2</version>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.hibernate</groupId>
-			<artifactId>hibernate-core</artifactId>
-			<version>3.6.4.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -106,4 +143,15 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
 </project>
