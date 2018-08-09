@@ -73,9 +73,43 @@ final class HibernateAdapter
   {
     log.trace("config(Config)");
 
-    boolean testSession = config.getAttribute("test-session", boolean.class, false);
+    // Hibernate configuration class is the session factory builder
+    Configuration configuration = null;
 
-    transactionTimeout = config.getProperty("hibernate.transaction.timeout", int.class, 0);
+    String configResource = config.getAttribute("config");
+    if(configResource != null) {
+      log.debug("Configure Hibernate from configuration resource |%s|.", configResource);
+      configuration = new Configuration();
+      configuration.configure(configResource);
+    }
+    else {
+      log.debug("Configure Hibernate from j(s)-lib configuration object.");
+      configuration = hibernateConfiguration(config);
+    }
+
+    String timeout = configuration.getProperty("hibernate.transaction.timeout");
+    this.transactionTimeout = timeout != null ? Integer.parseInt(timeout) : 0;
+
+    String driverClassName = configuration.getProperty("hibernate.connection.driver_class");
+    if(driverClassName == null) {
+      throw new ConfigException("Missing driver class, e.g. property name='hibernate.connection.driver_class' and value 'com.mysql.jdbc.Driver'");
+    }
+    log.debug("Load database driver |%s|.", driverClassName);
+    Classes.forName(driverClassName);
+
+    log.debug("Create Hibernate session factory.");
+    sessionFactory = configuration.buildSessionFactory();
+  }
+
+  /**
+   * Configure Hibernate from j(s)-lib configuration object.
+   * 
+   * @param config configuration object.
+   * @return Hibernate configuration instance initialized from j(s)-lib configuration object.
+   */
+  private static Configuration hibernateConfiguration(Config config)
+  {
+    int transactionTimeout = config.getProperty("hibernate.transaction.timeout", int.class, 0);
     int min_size = config.getProperty("hibernate.c3p0.min_size", int.class, 0);
     int max_size = config.getProperty("hibernate.c3p0.max_size", int.class, 0);
     int max_statements = config.getProperty("hibernate.c3p0.max_statements", int.class, 0);
@@ -94,7 +128,7 @@ final class HibernateAdapter
     }
 
     Properties properties = config.getUnusedProperties();
-    if(!testSession) {
+    if(!config.getAttribute("test-session", boolean.class, false)) {
       // do not use C3P0 database connections pool when run tests
       // if tests are executed from Ant script, for speed reason all ran into a single virtual machine
       // every test requiring database connection will acquire connection but do no dispose till virtual machine end
@@ -104,7 +138,6 @@ final class HibernateAdapter
       properties.setProperty("hibernate.c3p0.preferredTestQuery", TEST_QUERY);
     }
 
-    // Hibernate configuration class is the session factory builder
     Configuration configuration = new Configuration();
     configuration.setProperties(properties);
 
@@ -125,21 +158,14 @@ final class HibernateAdapter
     // traverse all packages from <mappings> elements and add mapping files to configuration
     for(Config mappings : config.findChildren("mappings")) {
       String filesPattern = mappings.getAttribute("files-pattern", "*.hbm.xml");
-      String packageName = mappings.getAttribute("package");
-      if(packageName == null) {
-        continue;
-      }
+      // missing package attribute is replaced with empty string that is the 'name' of package root
+      String packageName = mappings.getAttribute("package", "");
       for(String resource : Classes.listPackageResources(packageName, filesPattern)) {
         configuration.addResource(resource);
       }
     }
 
-    String driverClassName = config.getProperty("hibernate.connection.driver_class");
-    log.debug("Load database driver |%s|.", driverClassName);
-    Classes.forName(driverClassName);
-
-    log.debug("Create Hibernate session factory.");
-    sessionFactory = configuration.buildSessionFactory();
+    return configuration;
   }
 
   /**
