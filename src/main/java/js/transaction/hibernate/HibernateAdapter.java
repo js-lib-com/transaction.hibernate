@@ -2,6 +2,11 @@ package js.transaction.hibernate;
 
 import java.util.Properties;
 
+import org.hibernate.HibernateException;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+
 import js.lang.BugError;
 import js.lang.Config;
 import js.lang.ConfigException;
@@ -9,11 +14,6 @@ import js.log.Log;
 import js.log.LogFactory;
 import js.transaction.TransactionException;
 import js.util.Classes;
-
-import org.hibernate.HibernateException;
-import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
-import org.hibernate.cfg.Configuration;
 
 /**
  * Hibernate database adapter creates session factory and use it to create transactions. Keeps a transactions cache
@@ -223,6 +223,9 @@ final class HibernateAdapter
   {
     log.debug("Close Hibernate session factory and releases caches and database connections.");
     // access session factory through getter to have validity check
-    getSessionFactory().close();
+    SessionFactory sessionFactory = getSessionFactory();
+    if(sessionFactory != null) {
+      sessionFactory.close();
+    }
   }
 }
