@@ -34,6 +34,11 @@ final class HibernateAdapter
   // is reasonable to believe any database may have similar values
   // but to be on safe side I choose test period to be 30 minutes
 
+  /**
+   * Defualt Hibernate configuration resource is used when Config object is not provided, that is, is null. See
+   * {@link #config(Config)}.
+   */
+  private static final String DEFAULT_CONFIG = "hibernate.cfg.xml";
   /** Database connection keep alive period, set to half hour. */
   private static final String TEST_PERIOD = "1800";
   /** Query for database connection keep alive transaction. */
@@ -65,7 +70,7 @@ final class HibernateAdapter
    * <code>mappings</code> elements but usually it is a single one. A mapping element has <code>package</code> and
    * <code>files-pattern</code> attributes. Files pattern is optional with default <code>*.hbm.xml</code>.
    * 
-   * @param config configuration object.
+   * @param config configuration object, possible null.
    * @throws ConfigException if configuration object is not well formed.
    * @throws HibernateException if a property is not recognized by Hibernate session factory builder.
    */
@@ -76,13 +81,16 @@ final class HibernateAdapter
     // Hibernate configuration class is the session factory builder
     Configuration configuration = null;
 
-    String configResource = config.getAttribute("config");
+    // Hibernate configuration resource is not null if config parameter is null - for zero-config, or provided by config
+    // parameter itself as attribute
+    String configResource = config != null ? config.getAttribute("config") : DEFAULT_CONFIG;
     if(configResource != null) {
       log.debug("Configure Hibernate from configuration resource |%s|.", configResource);
       configuration = new Configuration();
       configuration.configure(configResource);
     }
     else {
+      // at this point config parameter is not null
       log.debug("Configure Hibernate from j(s)-lib configuration object.");
       configuration = hibernateConfiguration(config);
     }

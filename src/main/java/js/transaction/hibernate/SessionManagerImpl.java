@@ -19,7 +19,7 @@ import org.hibernate.Session;
  * 
  * @author Iulian Rotaru
  */
-final class SessionManagerImpl implements SessionManager {
+public final class SessionManagerImpl implements SessionManager {
 	/** Class logger. */
 	private static final Log log = LogFactory.getLog(SessionManagerImpl.class);
 
@@ -31,7 +31,7 @@ final class SessionManagerImpl implements SessionManager {
 	 * 
 	 * @param context transaction executed in current thread.
 	 */
-	private SessionManagerImpl(TransactionContext context) {
+	public SessionManagerImpl(TransactionContext context) {
 		log.trace("SessionManagerImpl(TransactionContext)");
 		this.context = context;
 	}
