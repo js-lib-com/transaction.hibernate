@@ -38,7 +38,7 @@ final class HibernateAdapter
    * Defualt Hibernate configuration resource is used when Config object is not provided, that is, is null. See
    * {@link #config(Config)}.
    */
-  private static final String DEFAULT_CONFIG = "hibernate.cfg.xml";
+  public static final String DEFAULT_CONFIG = "hibernate.cfg.xml";
   /** Database connection keep alive period, set to half hour. */
   private static final String TEST_PERIOD = "1800";
   /** Query for database connection keep alive transaction. */

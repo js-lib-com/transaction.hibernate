@@ -5,31 +5,66 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
-
 import js.lang.BugError;
 import js.lang.Config;
+import js.log.Log;
+import js.log.LogFactory;
 import js.transaction.Immutable;
 import js.transaction.Mutable;
 import js.transaction.Transaction;
 import js.transaction.TransactionContext;
+import js.transaction.TransactionFactory;
 import js.transaction.TransactionManager;
 import js.util.Classes;
 
-public class DaoRule<I> implements TestRule, TransactionContext
+/**
+ * Hibernate based implementation for {@link TransactionFactory} interface. This transaction factory implementation
+ * creates a new Java Proxy that executes methods inside a transaction. When create factory instance need to provide
+ * resource name for Hibernate configuration XML file, see {@link #TransactionFactoryImpl(String)}. There is also a
+ * convenient constructor that uses default resource name, <code>hibernate.cfg.xml</code>.
+ * 
+ * <h3>Transaction Class Arguments</h3>
+ * <p>
+ * This transaction factory recognize only one single argument of type {@link SessionManager}. Therefore constructor
+ * signature should be as in sample code. Also optional arguments from {@link #newInstance(Class, Object...)} are not
+ * used.
+ * 
+ * <pre>
+ *  class DaoImpl implements Dao {
+ *      DaoImpl(SessionManager sm) {
+ *      }
+ *  }
+ *  ...
+ *  Dao dao = factory.newInstance(DaoImpl.class);
+ * </pre>
+ * 
+ * @author Iulian Rotaru
+ * @version draft
+ */
+public class TransactionFactoryImpl implements TransactionFactory, TransactionContext
 {
+  private static final Log log = LogFactory.getLog(TransactionFactoryImpl.class);
+
   private final TransactionManager manager;
   private final ThreadLocal<Object> sessionStorage = new ThreadLocal<>();
-  private final I dao;
-  private final boolean immutableClass;
 
-  @SuppressWarnings("unchecked")
-  public DaoRule(Class<?> implementationClass, String configResource)
+  /**
+   * Convenient constructor using default Hibernate configuration file, <code>hibernate.cfg.xml</code>.
+   */
+  public TransactionFactoryImpl()
   {
-    // for unknown reason compiler does not accept Class<? extends I> when create DAO rule instance
-    
+    this(HibernateAdapter.DEFAULT_CONFIG);
+    log.trace("TransactionFactoryImpl()");
+  }
+
+  /**
+   * Create transaction factory instance and configure it from given resource name.
+   * 
+   * @param configResource resource name for Hibernate configuration.
+   */
+  public TransactionFactoryImpl(String configResource)
+  {
+    log.trace("TransactionFactoryImpl(String configResource)");
     manager = new TransactionManagerImpl();
 
     Config config = new Config("data-source");
@@ -40,39 +75,18 @@ public class DaoRule<I> implements TestRule, TransactionContext
     catch(Exception e) {
       throw new BugError(e);
     }
+  }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public <I> I newInstance(Class<? extends I> implementationClass, Object... args)
+  {
+    log.trace("newInstance(Class<? extends I>, Object...)");
     ClassLoader classLoader = implementationClass.getClassLoader();
     Class<?>[] interfaces = implementationClass.getInterfaces();
     I instance = (I)Classes.newInstance(implementationClass, new SessionManagerImpl(this));
     InvocationHandler handler = new TransactionalProxy(instance);
-    dao = (I)Proxy.newProxyInstance(classLoader, interfaces, handler);
-
-    Annotation annotation = implementationClass.getAnnotation(Immutable.class);
-    for(Class<?> interfaceClass : interfaces) {
-      if(annotation != null) {
-        break;
-      }
-      annotation = interfaceClass.getAnnotation(Immutable.class);
-    }
-    immutableClass = annotation != null;
-  }
-
-  public I getDaoInstance()
-  {
-    return dao;
-  }
-
-  @Override
-  public Statement apply(final Statement base, Description description)
-  {
-    return new Statement()
-    {
-      @Override
-      public void evaluate() throws Throwable
-      {
-        base.evaluate();
-      }
-    };
+    return (I)Proxy.newProxyInstance(classLoader, interfaces, handler);
   }
 
   @SuppressWarnings("unchecked")
@@ -82,13 +96,32 @@ public class DaoRule<I> implements TestRule, TransactionContext
     return (T)sessionStorage.get();
   }
 
+  // ----------------------------------------------------------------------------------------------
+  // INNER CLASSES
+
+  /**
+   * Java invocation handler for transactional Proxy. Executes every method in transaction boundaries.
+   * 
+   * @author Iulian Rotaru
+   * @version draft
+   */
   private class TransactionalProxy implements InvocationHandler
   {
     private final Object instance;
+    private final boolean immutableClass;
 
     public TransactionalProxy(Object instance)
     {
       this.instance = instance;
+
+      Annotation annotation = instance.getClass().getAnnotation(Immutable.class);
+      for(Class<?> interfaceClass : instance.getClass().getInterfaces()) {
+        if(annotation != null) {
+          break;
+        }
+        annotation = interfaceClass.getAnnotation(Immutable.class);
+      }
+      immutableClass = annotation != null;
     }
 
     @Override
