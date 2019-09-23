@@ -19,7 +19,7 @@ public class TransactionManagerUnitTest extends TestCase {
 		TransactionManager manager = new TransactionManagerImpl();
 		manager.config(config);
 
-		Transaction t = manager.createTransaction();
+		Transaction t = manager.createTransaction(null);
 		try {
 			// execute transactional working unit
 			t.commit();

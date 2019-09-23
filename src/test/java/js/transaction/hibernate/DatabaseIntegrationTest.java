@@ -27,7 +27,7 @@ public class DatabaseIntegrationTest extends TestCase {
 	}
 
 	public void testExecuteHibernateTransaction() throws Exception {
-		Transaction transaction = transactionManager.createTransaction();
+		Transaction transaction = transactionManager.createTransaction(null);
 
 		Person person = new Person();
 		Session session = Util.getSession(transactionManager);
@@ -48,7 +48,7 @@ public class DatabaseIntegrationTest extends TestCase {
 
 			public void run() {
 				for (int i = 0; i < 4; i++) {
-					Transaction t = transactionManager.createTransaction();
+					Transaction t = transactionManager.createTransaction(null);
 					try {
 						Session session = Util.getSession(transactionManager);
 						Person person = new Person();
@@ -135,12 +135,12 @@ public class DatabaseIntegrationTest extends TestCase {
 	}
 
 	public void testNestedTransactions() {
-		Transaction outerTransaction = transactionManager.createTransaction();
+		Transaction outerTransaction = transactionManager.createTransaction(null);
 
 		transactionManager.exec(new WorkingUnit<Session, Void>() {
 			@Override
 			public Void exec(Session session, Object... args) throws Exception {
-				Transaction innerTransaction = transactionManager.createTransaction();
+				Transaction innerTransaction = transactionManager.createTransaction(null);
 				Person person = new Person();
 				session.saveOrUpdate(person);
 				innerTransaction.commit();
@@ -162,7 +162,7 @@ public class DatabaseIntegrationTest extends TestCase {
 		} catch (TransactionException e) {
 		}
 
-		Transaction transaction = transactionManager.createTransaction();
+		Transaction transaction = transactionManager.createTransaction(null);
 		try {
 			transaction.close();
 			Person person = new Person();

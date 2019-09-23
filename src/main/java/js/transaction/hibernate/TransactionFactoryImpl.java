@@ -135,7 +135,7 @@ public class TransactionFactoryImpl implements TransactionFactory, TransactionCo
         immutableMethod = false;
       }
 
-      Transaction transaction = immutableMethod ? manager.createReadOnlyTransaction() : manager.createTransaction();
+      Transaction transaction = immutableMethod ? manager.createReadOnlyTransaction(null) : manager.createTransaction(null);
       sessionStorage.set(transaction.getSession());
 
       try {

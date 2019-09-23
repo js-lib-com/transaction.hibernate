@@ -38,22 +38,22 @@ public final class TransactionManagerImpl implements TransactionManager
   }
 
   @Override
-  public Transaction createTransaction()
+  public Transaction createTransaction(String schema)
   {
     return adapter.createTransaction(false);
   }
 
   @Override
-  public Transaction createReadOnlyTransaction()
+  public Transaction createReadOnlyTransaction(String schema)
   {
     return adapter.createTransaction(true);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public <S, T> T exec(WorkingUnit<S, T> workingUnit, Object... args)
+  public <S, T> T exec(String schema, WorkingUnit<S, T> workingUnit, Object... args)
   {
-    Transaction t = createTransaction();
+    Transaction t = createTransaction(schema);
     T o = null;
     try {
       o = (T)workingUnit.exec((S)t.getSession(), args);
@@ -67,6 +67,12 @@ public final class TransactionManagerImpl implements TransactionManager
       t.close();
     }
     return o;
+  }
+
+  @Override
+  public <S, T> T exec(WorkingUnit<S, T> workingUnit, Object... args) throws TransactionException
+  {
+    return exec(null, workingUnit, args);
   }
 
   @Override

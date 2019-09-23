@@ -28,7 +28,7 @@ public class DatabaseStressedTest extends TestCase
   {
 
     for(int i = 0; i < 1000000; i++) {
-      Transaction t = transactionManager.createTransaction();
+      Transaction t = transactionManager.createTransaction(null);
       try {
         Session session = Util.getSession(transactionManager);
         Person person = new Person();

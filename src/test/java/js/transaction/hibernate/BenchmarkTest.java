@@ -49,7 +49,7 @@ public class BenchmarkTest extends TestCase
 
   private void executeWriteableTransaction(int id)
   {
-    Transaction transaction = transactionManager.createTransaction();
+    Transaction transaction = transactionManager.createTransaction(null);
 
     Session session = Util.getSession(transactionManager);
     session.get(Person.class, id);
@@ -60,7 +60,7 @@ public class BenchmarkTest extends TestCase
 
   private void executeReadOnlyTransaction(int id)
   {
-    Transaction transaction = transactionManager.createReadOnlyTransaction();
+    Transaction transaction = transactionManager.createReadOnlyTransaction(null);
 
     Session session = Util.getSession(transactionManager);
     session.get(Person.class, id);
