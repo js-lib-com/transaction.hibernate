@@ -5,6 +5,6 @@
 	<property name="hibernate.connection.username" value="test" />
 	<property name="hibernate.default_schema" value="test" />
 	<property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect" />
-	<property name="hibernate.show_sql" value="false" />
-	<mappings package="js.transaction.hibernate.test" files-pattern="*.hbm" />
+	<property name="hibernate.show_sql" value="true" />
+	<mappings package="mappings" files-pattern="*.hbm" />
 </data-source>

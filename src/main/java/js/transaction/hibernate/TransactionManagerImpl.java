@@ -1,5 +1,7 @@
 package js.transaction.hibernate;
 
+import org.hibernate.Session;
+
 import js.lang.Config;
 import js.lang.ConfigException;
 import js.log.Log;
@@ -28,6 +30,16 @@ public final class TransactionManagerImpl implements TransactionManager
   {
     log.trace("TransactionManagerImpl()");
     this.adapter = new HibernateAdapter();
+  }
+
+  /**
+   * Retrieve internal Hibernate session, for testing.
+   * 
+   * @return reference to Hibernate session.
+   */
+  public Session getSession()
+  {
+    return adapter.getSession();
   }
 
   @Override

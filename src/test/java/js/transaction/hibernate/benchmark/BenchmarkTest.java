@@ -1,34 +1,31 @@
-package js.transaction.hibernate;
-
-import java.io.File;
+package js.transaction.hibernate.benchmark;
 
 import org.hibernate.Session;
-import org.junit.Ignore;
+import org.junit.Before;
+import org.junit.Test;
 
 import js.lang.ConfigBuilder;
 import js.transaction.Transaction;
-import js.transaction.TransactionManager;
-import js.transaction.hibernate.Util;
-import js.util.Classes;
-import junit.framework.TestCase;
+import js.transaction.hibernate.Person;
+import js.transaction.hibernate.TransactionManagerImpl;
 
-@Ignore
-public class BenchmarkTest extends TestCase
+public class BenchmarkTest
 {
-  private TransactionManager transactionManager;
+  private final int TEST_COUNT = 1000000;
 
-  @Override
-  protected void setUp() throws Exception
+  private TransactionManagerImpl transactionManager;
+
+  @Before
+  public void beforeTest() throws Exception
   {
-    transactionManager = Classes.newInstance(Util.TRANSACTION_IMPL);
-    ConfigBuilder builder = new ConfigBuilder(new File("fixture/benchmark-config.xml"));
-    Classes.invoke(transactionManager, "config", builder.build());
+    transactionManager = new TransactionManagerImpl();
+    ConfigBuilder builder = new ConfigBuilder(getClass().getResourceAsStream("/benchmark-config.xml"));
+    transactionManager.config(builder.build());
   }
 
-  public void testWritableVersusReadOnly()
+  @Test
+  public void writableVersusReadOnly()
   {
-    final int TEST_COUNT = 1000000;
-
     executeWriteableTransaction(1);
     executeReadOnlyTransaction(1);
 
@@ -37,23 +34,21 @@ public class BenchmarkTest extends TestCase
     for(int i = 0; i < TEST_COUNT; ++i) {
       executeWriteableTransaction(i % 10000);
     }
-    System.out.printf("Writeable transactions: %d\n", System.currentTimeMillis() - writeableStart);
+    System.out.printf("Ellapsed time for %,d writeable transactions: %,d msec\n", TEST_COUNT, System.currentTimeMillis() - writeableStart);
 
     System.out.println("Start read-only transactions bench.");
     long readOnlyStart = System.currentTimeMillis();
     for(int i = 0; i < TEST_COUNT; ++i) {
       executeReadOnlyTransaction(i % 10000);
     }
-    System.out.printf("Read-only transactions: %d\n", System.currentTimeMillis() - readOnlyStart);
+    System.out.printf("Ellapsed time for %,d read-only transactions: %,d msec\n", TEST_COUNT, System.currentTimeMillis() - readOnlyStart);
   }
 
   private void executeWriteableTransaction(int id)
   {
     Transaction transaction = transactionManager.createTransaction(null);
-
-    Session session = Util.getSession(transactionManager);
+    Session session = transactionManager.getSession();
     session.get(Person.class, id);
-
     transaction.commit();
     transaction.close();
   }
@@ -61,10 +56,8 @@ public class BenchmarkTest extends TestCase
   private void executeReadOnlyTransaction(int id)
   {
     Transaction transaction = transactionManager.createReadOnlyTransaction(null);
-
-    Session session = Util.getSession(transactionManager);
+    Session session = transactionManager.getSession();
     session.get(Person.class, id);
-
     transaction.close();
   }
 }
