@@ -51,7 +51,7 @@ public class SessionManagerTest
   @Before
   public void beforeTest() throws Exception
   {
-    when(context.getSession()).thenReturn(session);
+    when(context.getResourceManager()).thenReturn(session);
     sm = new SessionManagerImpl(context);
   }
 

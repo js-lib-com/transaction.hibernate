@@ -3,16 +3,16 @@ package js.transaction.hibernate;
 import java.io.Serializable;
 import java.util.Collection;
 
+import org.hibernate.Hibernate;
+import org.hibernate.Query;
+import org.hibernate.Session;
+
 import js.lang.BugError;
 import js.log.Log;
 import js.log.LogFactory;
 import js.transaction.TransactionContext;
 import js.util.Classes;
 import js.util.Strings;
-
-import org.hibernate.Hibernate;
-import org.hibernate.Query;
-import org.hibernate.Session;
 
 /**
  * Implementation of {@link SessionManager} interface.
@@ -24,7 +24,7 @@ public final class SessionManagerImpl implements SessionManager {
 	private static final Log log = LogFactory.getLog(SessionManagerImpl.class);
 
 	/** Transaction executed in current thread. Used to retrieve hibernate session instance. */
-	private TransactionContext context;
+	private final TransactionContext context;
 
 	/**
 	 * Construct session manager instance and inject transaction context dependency.
@@ -119,7 +119,7 @@ public final class SessionManagerImpl implements SessionManager {
 
 	@Override
 	public Session getSession() {
-		Session session = context.getSession();
+		Session session = context.getResourceManager();
 		if (session == null) {
 			throw new BugError("Attempt to get session object outside a transaction.");
 		}

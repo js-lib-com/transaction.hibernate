@@ -4,7 +4,6 @@ import org.hibernate.Session;
 import org.junit.Before;
 import org.junit.Test;
 
-import js.lang.ConfigBuilder;
 import js.transaction.Transaction;
 import js.transaction.hibernate.Person;
 import js.transaction.hibernate.TransactionManagerImpl;
@@ -19,8 +18,6 @@ public class BenchmarkTest
   public void beforeTest() throws Exception
   {
     transactionManager = new TransactionManagerImpl();
-    ConfigBuilder builder = new ConfigBuilder(getClass().getResourceAsStream("/benchmark-config.xml"));
-    transactionManager.config(builder.build());
   }
 
   @Test
@@ -29,7 +26,7 @@ public class BenchmarkTest
     executeWriteableTransaction(1);
     executeReadOnlyTransaction(1);
 
-    System.out.println("Start writeable transactions bench.");
+    System.out.println("Start writeable transactions benchmark.");
     long writeableStart = System.currentTimeMillis();
     for(int i = 0; i < TEST_COUNT; ++i) {
       executeWriteableTransaction(i % 10000);

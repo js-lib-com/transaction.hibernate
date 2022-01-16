@@ -1,10 +1,10 @@
 package js.transaction.hibernate;
 
-import js.transaction.Transaction;
-import js.transaction.TransactionException;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+
+import js.transaction.Transaction;
+import js.transaction.TransactionException;
 
 /**
  * Transaction implementation for Hibernate session.
@@ -32,9 +32,6 @@ final class TransactionImpl implements Transaction
 
   /** A read only transaction does not explicitly begin or commit/rollback but rely on database (driver). */
   private final boolean readOnly;
-
-  /** Flag to detect if transaction working unit is actually using transactional session. */
-  private boolean unused = true;
 
   /** Flag indicating that transaction was closes and is not longer legal to operate on it. */
   private boolean closed = false;
@@ -134,20 +131,13 @@ final class TransactionImpl implements Transaction
     return true;
   }
 
-  @Override
-  public boolean unused()
-  {
-    return unused;
-  }
-
   @SuppressWarnings("unchecked")
   @Override
-  public <T> T getSession()
+  public <T> T getResourceManager()
   {
     if(closed) {
       throw new IllegalStateException("Closed Hibernate session.");
     }
-    unused = false;
     return (T)session;
   }
 

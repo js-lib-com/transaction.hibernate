@@ -4,7 +4,6 @@ import org.hibernate.Session;
 import org.junit.Before;
 import org.junit.Test;
 
-import js.lang.ConfigBuilder;
 import js.transaction.Transaction;
 import js.transaction.hibernate.Person;
 import js.transaction.hibernate.TransactionManagerImpl;
@@ -17,8 +16,6 @@ public class DatabaseStressedTest
   public void beforeTest() throws Exception
   {
     transactionManager = new TransactionManagerImpl();
-    ConfigBuilder builder = new ConfigBuilder(getClass().getResourceAsStream("/integration-config.xml"));
-    transactionManager.config(builder.build());
   }
 
   @Test

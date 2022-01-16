@@ -2,8 +2,6 @@ package js.transaction.hibernate;
 
 import org.hibernate.Session;
 
-import js.lang.Config;
-import js.lang.ConfigException;
 import js.log.Log;
 import js.log.LogFactory;
 import js.transaction.Transaction;
@@ -19,13 +17,10 @@ import js.transaction.WorkingUnit;
  */
 public final class TransactionManagerImpl implements TransactionManager
 {
-  /** Class logger. */
   private static final Log log = LogFactory.getLog(TransactionManagerImpl.class);
 
-  /** Adapter for Hibernate ORM engine. */
   private HibernateAdapter adapter;
 
-  /** Create transaction manager instance. */
   public TransactionManagerImpl()
   {
     log.trace("TransactionManagerImpl()");
@@ -40,13 +35,6 @@ public final class TransactionManagerImpl implements TransactionManager
   public Session getSession()
   {
     return adapter.getSession();
-  }
-
-  @Override
-  public void config(Config config) throws ConfigException
-  {
-    log.trace("config(Config)");
-    adapter.config(config);
   }
 
   @Override
@@ -68,7 +56,7 @@ public final class TransactionManagerImpl implements TransactionManager
     Transaction t = createTransaction(schema);
     T o = null;
     try {
-      o = (T)workingUnit.exec((S)t.getSession(), args);
+      o = (T)workingUnit.exec((S)t.getResourceManager(), args);
       t.commit();
     }
     catch(Exception e) {

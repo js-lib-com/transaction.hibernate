@@ -6,7 +6,6 @@ import org.hibernate.cfg.Configuration;
 import org.junit.Before;
 import org.junit.Test;
 
-import js.lang.ConfigBuilder;
 import js.transaction.Transaction;
 import js.transaction.TransactionException;
 import js.transaction.WorkingUnit;
@@ -22,8 +21,6 @@ public class DatabaseIntegrationTest
   public void beforeTest() throws Exception
   {
     transactionManager = new TransactionManagerImpl();
-    ConfigBuilder builder = new ConfigBuilder(getClass().getResourceAsStream("/integration-config.xml"));
-    transactionManager.config(builder.build());
   }
 
   @Test
@@ -103,7 +100,7 @@ public class DatabaseIntegrationTest
     cfg.setProperty("hibernate.c3p0.timeout", "1800");
     cfg.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQLDialect");
     cfg.setProperty("hibernate.show_sql", "false");
-    cfg.addResource("mappings/person.hbm");
+    cfg.addResource("person.hbm");
 
     final SessionFactory sessionFactory = cfg.buildSessionFactory();
 
