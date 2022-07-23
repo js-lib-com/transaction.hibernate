@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>com.js-lib</groupId>
 			<artifactId>js-jee-api</artifactId>
-			<version>1.0</version>
+			<version>1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
@@ -178,28 +178,4 @@
 			</distributionManagement>
 		</profile>
 	</profiles>
-
-	<repositories>
-		<repository>
-			<id>js-lib</id>
-			<url>https://maven.js-lib.com/</url>
-		</repository>
-	</repositories>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>js-lib</id>
-			<url>https://maven.js-lib.com/</url>
-		</pluginRepository>
-	</pluginRepositories>
-
-	<distributionManagement>
-		<snapshotRepository>
-			<id>js-lib</id>
-			<url>https://maven.js-lib.com/</url>
-		</snapshotRepository>
-		<repository>
-			<id>js-lib</id>
-			<url>https://maven.js-lib.com/</url>
-		</repository>
-	</distributionManagement>
 </project>
