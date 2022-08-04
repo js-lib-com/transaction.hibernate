@@ -7,10 +7,11 @@ import org.hibernate.Hibernate;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
+import com.jslib.api.log.Log;
+import com.jslib.api.log.LogFactory;
+
 import jakarta.inject.Inject;
 import js.lang.BugError;
-import js.log.Log;
-import js.log.LogFactory;
 import js.transaction.TransactionContext;
 import js.util.Classes;
 import js.util.Strings;

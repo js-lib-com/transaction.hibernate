@@ -4,10 +4,11 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 
+import com.jslib.api.log.Log;
+import com.jslib.api.log.LogFactory;
+
 import js.lang.BugError;
 import js.lang.Config;
-import js.log.Log;
-import js.log.LogFactory;
 import js.transaction.TransactionException;
 
 /**

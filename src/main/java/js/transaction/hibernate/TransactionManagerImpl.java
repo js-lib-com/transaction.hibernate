@@ -2,8 +2,9 @@ package js.transaction.hibernate;
 
 import org.hibernate.Session;
 
-import js.log.Log;
-import js.log.LogFactory;
+import com.jslib.api.log.Log;
+import com.jslib.api.log.LogFactory;
+
 import js.transaction.Transaction;
 import js.transaction.TransactionException;
 import js.transaction.TransactionManager;
