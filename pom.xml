@@ -181,4 +181,12 @@
 			</distributionManagement>
 		</profile>
 	</profiles>
+	
+    <distributionManagement>
+        <repository>
+            <id>gnotis-hub</id>
+            <url>https://hub.gnotis.ro/repository/maven-releases/</url>
+        </repository>
+    </distributionManagement>
+	
 </project>
